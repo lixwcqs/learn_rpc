@@ -13,7 +13,8 @@ import xyz.anduo.rpc.client.RpcProxy;
 import xyz.anduo.rpc.sieve.modules.simple.HelloService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:spring-client.xml")
+//@ContextConfiguration(locations = {"classpath*:spring-client.xml","classpath*:spring-server.xml"})
+@ContextConfiguration(locations = {"classpath*:spring-client.xml"})
 public class HelloServiceTest {
 
 	@Autowired
@@ -22,8 +23,11 @@ public class HelloServiceTest {
     @Test
     public void helloTest() {
         try {
+			System.out.println(rpcProxy);
 			HelloService helloService = rpcProxy.create(HelloService.class);
+			System.out.println(helloService);
 			String result = helloService.hello("World");
+			System.out.println("result:" + result);
 			Assert.assertEquals("Hello! World", result);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -12,9 +12,10 @@ import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.anduo.rpc.common.Constant;
+import xyz.anduo.rpc.common.CqsLogger;
 
 
-public class ServiceRegistry {
+public class ServiceRegistry implements CqsLogger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRegistry.class);
 
@@ -29,8 +30,10 @@ public class ServiceRegistry {
     public void register(String data) {
         if (data != null) {
             ZooKeeper zk = connectServer();
+            logger.debug("connectServer");
             if (zk != null) {
                 createNode(zk, data);
+                logger.debug("create Node" + zk + "\t" + data);
             }
         }
     }
@@ -39,7 +42,6 @@ public class ServiceRegistry {
         ZooKeeper zk = null;
         try {
             zk = new ZooKeeper(registryAddress, Constant.ZK_SESSION_TIMEOUT, new Watcher() {
-
                 public void process(WatchedEvent event) {
                     if (event.getState() == Event.KeeperState.SyncConnected) {
                         latch.countDown();

@@ -13,11 +13,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.anduo.rpc.common.CqsLogger;
 import xyz.anduo.rpc.common.RpcDecoder;
 import xyz.anduo.rpc.common.RpcEncoder;
 
 
-public class RpcClient extends SimpleChannelInboundHandler<RpcResponse> {
+public class RpcClient extends SimpleChannelInboundHandler<RpcResponse> implements CqsLogger {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RpcClient.class);
 
@@ -36,6 +37,7 @@ public class RpcClient extends SimpleChannelInboundHandler<RpcResponse> {
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
 		this.response = response;
+		logger.debug("channelRead0- object " + obj);
 		synchronized (obj) {
 			obj.notifyAll(); // 收到响应，唤醒线程
 		}
@@ -48,6 +50,7 @@ public class RpcClient extends SimpleChannelInboundHandler<RpcResponse> {
 	}
 
 	public RpcResponse send(RpcRequest request) throws Exception {
+		logger.debug("send message");
 		EventLoopGroup group = new NioEventLoopGroup();
 		try {
 			Bootstrap bootstrap = new Bootstrap();
@@ -59,14 +62,14 @@ public class RpcClient extends SimpleChannelInboundHandler<RpcResponse> {
 							.addLast(RpcClient.this); // 使用 RpcClient 发送 RPC 请求
 				}
 			}).option(ChannelOption.SO_KEEPALIVE, true);
-
 			ChannelFuture future = bootstrap.connect(host, port).sync();
 			future.channel().writeAndFlush(request).sync();
-
+			logger.debug("object:" + obj.getClass());
 			synchronized (obj) {
-				obj.wait(); // 未收到响应，使线程等待
+//				obj.wait(); // 未收到响应，使线程等待
+				obj.wait(3000);
 			}
-
+			logger.debug("wait over...");
 			if (response != null) {
 				future.channel().closeFuture().sync();
 			}
