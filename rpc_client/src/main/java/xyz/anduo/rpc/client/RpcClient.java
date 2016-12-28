@@ -37,7 +37,6 @@ public class RpcClient extends SimpleChannelInboundHandler<RpcResponse> implemen
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
 		this.response = response;
-		logger.debug("channelRead0- object " + obj);
 		synchronized (obj) {
 			obj.notifyAll(); // 收到响应，唤醒线程
 		}
@@ -50,7 +49,6 @@ public class RpcClient extends SimpleChannelInboundHandler<RpcResponse> implemen
 	}
 
 	public RpcResponse send(RpcRequest request) throws Exception {
-		logger.debug("send message");
 		EventLoopGroup group = new NioEventLoopGroup();
 		try {
 			Bootstrap bootstrap = new Bootstrap();
@@ -64,12 +62,9 @@ public class RpcClient extends SimpleChannelInboundHandler<RpcResponse> implemen
 			}).option(ChannelOption.SO_KEEPALIVE, true);
 			ChannelFuture future = bootstrap.connect(host, port).sync();
 			future.channel().writeAndFlush(request).sync();
-			logger.debug("object:" + obj.getClass());
 			synchronized (obj) {
-//				obj.wait(); // 未收到响应，使线程等待
-				obj.wait(3000);
+				obj.wait(); // 未收到响应，使线程等待
 			}
-			logger.debug("wait over...");
 			if (response != null) {
 				future.channel().closeFuture().sync();
 			}

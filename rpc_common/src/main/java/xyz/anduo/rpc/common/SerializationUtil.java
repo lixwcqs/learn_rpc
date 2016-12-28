@@ -1,5 +1,6 @@
 package xyz.anduo.rpc.common;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,5 +55,12 @@ public class SerializationUtil {
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
+    }
+
+    public static void main(String[] args) {
+        RpcDecoder rpcDecoder = objenesis.newInstance(RpcDecoder.class);
+        System.out.println(rpcDecoder);
+        System.out.println(objenesis.getInstantiatorOf(List.class));
+
     }
 }

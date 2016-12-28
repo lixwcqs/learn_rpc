@@ -14,7 +14,7 @@ public class RpcResponse {
 	}
 	
 	public boolean isError(){
-		return error == null;
+		return error != null;
 	}
 
 	public Throwable getError() {

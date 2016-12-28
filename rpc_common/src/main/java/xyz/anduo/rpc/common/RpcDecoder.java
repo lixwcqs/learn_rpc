@@ -34,22 +34,4 @@ public class RpcDecoder extends ByteToMessageDecoder {
 		Object obj = SerializationUtil.deserialize(data, genericClass);
 		out.add(obj);
 	}
-
-    public static class RpcEncoder extends MessageToByteEncoder<Object> {
-
-        private Class<?> genericClass;
-
-        public RpcEncoder(Class<?> genericClass) {
-            this.genericClass = genericClass;
-        }
-
-        @Override
-        public void encode(ChannelHandlerContext ctx, Object in, ByteBuf out) throws Exception {
-            if (genericClass.isInstance(in)) {
-                byte[] data = SerializationUtil.serialize(in);
-                out.writeInt(data.length);
-                out.writeBytes(data);
-            }
-        }
-    }
 }
